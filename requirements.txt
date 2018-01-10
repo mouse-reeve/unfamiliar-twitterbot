@@ -1,1 +1,1 @@
-TwitterAPI==2.4.6
+TwitterAPI==2.4.2
