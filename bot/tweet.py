@@ -20,6 +20,20 @@ def get_latin(word, capitalize=False):
         return text[0].upper() + text[1:]
     return text
 
+
+def get_ipa(word, capitalize=False):
+    ''' formatting foreign words '''
+    text = ''
+    word = word.__dict__ if not isinstance(word, dict) else word
+    for syllable in word['lemma']:
+        text = text + ''.join(l['ipa'] for l in syllable)
+    text = re.sub('/', '', text)
+
+    if capitalize:
+        return text[0].upper() + text[1:]
+    return text
+
+
 def get_tweet():
     ''' create tweet content '''
 
@@ -38,7 +52,7 @@ def get_tweet():
 
 def slogan(city, city_data):
     ''' city's slogan '''
-    return '%s: %s' % (city, city_data['slogan'])
+    return 'The city of %s: %s' % (city, city_data['slogan'])
 
 def animal(city, city_data):
     ''' a native species '''
@@ -46,6 +60,15 @@ def animal(city, city_data):
             (city,
              get_latin(city_data['wildlife']['name']),
              city_data['wildlife']['description'].split('.')[0])
+
+def translation(_, city_data):
+    ''' the word for hello is ___ '''
+    return 'In the %s language, "hello" is "%s" (%s)' % (
+        get_latin(city_data['language']['name']),
+        get_latin(city_data['dictionary']['helloNN']),
+        get_ipa(city_data['dictionary']['helloNN'])
+    )
+
 
 # posting logic
 try:
