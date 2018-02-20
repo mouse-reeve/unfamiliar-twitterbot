@@ -1,7 +1,8 @@
 ''' post a tweet from the queued file '''
 from datetime import datetime
-from bot import settings
+import settings
 import json
+import random
 import re
 from TwitterAPI import TwitterAPI
 from urllib.request import Request, urlopen
@@ -23,15 +24,24 @@ def get_tweet():
     ''' create tweet content '''
 
     seed = datetime.now().time().strftime('%H%M%S%f')
-    response = urlopen(Request('https://unfamiliar.city/%s/datafile' % seed))
+    city_url = 'https://unfamiliar.city/%s' % seed
+    response = urlopen(Request('%s/datafile' % city_url))
 
     city_data = json.loads(response.read().decode('utf-8'))
     city = get_latin(city_data['city_name'], capitalize=True)
-    text = 'The city of %s contains a %s' % \
-            (city, response['wildlife']['description'])
 
+    options = [animal]
+    text = random.choice(options)(city, city_data)
+    text += ' ' + city_url
     tweet_data = {'status': text}
     return tweet_data
+
+def animal(city, city_data):
+    ''' a native species '''
+    return 'The city of %s is home to a rare species known as %s: %s' % \
+            (city,
+             get_latin(city_data['wildlife']['name']),
+             city_data['wildlife']['description'].split('.')[0])
 
 # posting logic
 try:
@@ -39,7 +49,8 @@ try:
                      settings.TWITTER_API_SECRET,
                      settings.TWITTER_ACCESS_TOKEN,
                      settings.TWITTER_ACCESS_SECRET)
-except:
+except Exception as e:
+    print(e)
     API = None
 
 data = get_tweet()
