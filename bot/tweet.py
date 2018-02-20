@@ -26,7 +26,7 @@ def get_ipa(word, capitalize=False):
     text = ''
     word = word.__dict__ if not isinstance(word, dict) else word
     for syllable in word['lemma']:
-        text = text + ''.join(l['ipa'] for l in syllable)
+        text = text + ''.join(l['IPA'] for l in syllable)
     text = re.sub('/', '', text)
 
     if capitalize:
@@ -44,15 +44,16 @@ def get_tweet():
     city_data = json.loads(response.read().decode('utf-8'))
     city = get_latin(city_data['city_name'], capitalize=True)
 
-    options = [animal, slogan]
+    options = [animal, get_slogan, translation, weather_today]
     text = random.choice(options)(city, city_data)
     text += '\n' + city_url
     tweet_data = {'status': text}
     return tweet_data
 
-def slogan(city, city_data):
+def get_slogan(city, city_data):
     ''' city's slogan '''
-    return 'The city of %s: %s' % (city, city_data['slogan'])
+    slogan = city_data['slogan'][0].upper() + city_data['slogan'][1:]
+    return 'The city of %s: %s' % (city, slogan)
 
 def animal(city, city_data):
     ''' a native species '''
@@ -63,11 +64,31 @@ def animal(city, city_data):
 
 def translation(_, city_data):
     ''' the word for hello is ___ '''
-    return 'In the %s language, "hello" is "%s" (%s)' % (
+    word = random.choice([
+        'helloNN',
+        'goodbyeNN',
+        'thanksNN',
+        'sorryNN',
+    ])
+    return 'To say "%s" in the %s language, say "%s" (%s)' % (
+        city_data['dictionary'][word]['translation'],
         get_latin(city_data['language']['name']),
-        get_latin(city_data['dictionary']['helloNN']),
-        get_ipa(city_data['dictionary']['helloNN'])
+        get_latin(city_data['dictionary'][word]),
+        get_ipa(city_data['dictionary'][word])
     )
+
+def weather_today(city, city_data):
+    ''' today's weather '''
+    platitude = random.choice([
+        'Today is a beautiful day in %s.',
+        'It\'s a beautiful day in %s.',
+    ])
+    weather = city_data['weather']['forecast'][0]
+    sky = weather['precipitation'] or 'clear skies'
+    return u'%s Expect %s and a high of %d \u00BAC' % (
+        platitude % city,
+        sky,
+        float(int(weather['high'] * 10)) / 10)
 
 
 # posting logic
