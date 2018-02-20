@@ -85,11 +85,10 @@ def weather_today(city, city_data):
     ])
     weather = city_data['weather']['forecast'][0]
     sky = weather['precipitation'] or 'clear skies'
-    return u'%s Expect %s and a high of %d \u00BAC' % (
+    return u'%s Expect %s and a high of %d\u00BAC' % (
         platitude % city,
         sky,
         float(int(weather['high'] * 10)) / 10)
-
 
 # posting logic
 try:
