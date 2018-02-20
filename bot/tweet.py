@@ -24,17 +24,21 @@ def get_tweet():
     ''' create tweet content '''
 
     seed = datetime.now().time().strftime('%H%M%S%f')
-    city_url = 'https://unfamiliar.city/%s' % seed
+    city_url = 'https://unfamiliar.city/city/%s' % seed
     response = urlopen(Request('%s/datafile' % city_url))
 
     city_data = json.loads(response.read().decode('utf-8'))
     city = get_latin(city_data['city_name'], capitalize=True)
 
-    options = [animal]
+    options = [animal, slogan]
     text = random.choice(options)(city, city_data)
-    text += ' ' + city_url
+    text += '\n' + city_url
     tweet_data = {'status': text}
     return tweet_data
+
+def slogan(city, city_data):
+    ''' city's slogan '''
+    return '%s: %s' % (city, city_data['slogan'])
 
 def animal(city, city_data):
     ''' a native species '''
