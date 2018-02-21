@@ -44,16 +44,19 @@ def get_tweet():
     city_data = json.loads(response.read().decode('utf-8'))
     city = get_latin(city_data['city_name'], capitalize=True)
 
-    options = [animal, get_slogan, translation, weather_today]
+    options = [animal, get_slogan, translation, weather_today,
+               restaurant_review]
     text = random.choice(options)(city, city_data)
     text += '\n' + city_url
     tweet_data = {'status': text}
     return tweet_data
 
+
 def get_slogan(city, city_data):
     ''' city's slogan '''
     slogan = city_data['slogan'][0].upper() + city_data['slogan'][1:]
     return 'The city of %s: %s' % (city, slogan)
+
 
 def animal(city, city_data):
     ''' a native species '''
@@ -61,6 +64,7 @@ def animal(city, city_data):
             (city,
              get_latin(city_data['wildlife']['name']),
              city_data['wildlife']['description'].split('.')[0])
+
 
 def translation(_, city_data):
     ''' the word for hello is ___ '''
@@ -77,6 +81,7 @@ def translation(_, city_data):
         get_ipa(city_data['dictionary'][word])
     )
 
+
 def weather_today(city, city_data):
     ''' today's weather '''
     platitude = random.choice([
@@ -89,6 +94,14 @@ def weather_today(city, city_data):
         platitude % city,
         sky,
         float(int(weather['high'] * 10)) / 10)
+
+
+def restaurant_review(_, city_data):
+    ''' we love this local restaurant '''
+    return 'Don\'t miss %s, our favorite spot for %s-style cuisine' \
+       % (get_latin(city_data['restaurant']['name'], capitalize=True),
+          get_latin(city_data['country'], capitalize=True))
+
 
 # posting logic
 try:
